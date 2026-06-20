@@ -6,6 +6,7 @@ export interface IDecision extends Document {
   scoreImpact: number; // Could be negative or positive
   riskLevel: "Low" | "Medium" | "High";
   recoveryTime: string; // e.g., "3 months", "1 year"
+  explanation: string;
   createdAt: Date;
 }
 
@@ -16,6 +17,7 @@ const DecisionSchema: Schema = new Schema(
     scoreImpact: { type: Number, required: true },
     riskLevel: { type: String, enum: ["Low", "Medium", "High"], required: true },
     recoveryTime: { type: String, required: true },
+    explanation: { type: String, default: "" },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
