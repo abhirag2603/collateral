@@ -54,6 +54,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     ...authConfig.callbacks,
+    async jwt({ token, user, account, profile }) {
+      if (account?.provider === "google" && profile?.email) {
+        try {
+          await connectDB();
+          let dbUser = await User.findOne({ email: profile.email });
+          if (!dbUser) {
+            dbUser = await User.create({
+              name: profile.name || token.name,
+              email: profile.email,
+            });
+          }
+          token.sub = dbUser._id.toString();
+        } catch (err) {
+          console.error("Error linking Google account to DB:", err);
+        }
+      } else if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
     async session({ session, token }: { session: any; token: any }) {
       if (session.user && token?.sub) {
         session.user.id = token.sub as string

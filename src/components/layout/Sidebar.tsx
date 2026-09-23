@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Zap, LayoutDashboard, LineChart, Brain, Settings2, ShieldCheck, LogOut } from "lucide-react"
+import { Zap, LayoutDashboard, LineChart, Brain, Settings2, ShieldCheck, LogOut, User } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -15,6 +16,24 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [profile, setProfile] = useState<{ name: string, jobTitle: string } | null>(null)
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch("/api/profile")
+        if (res.ok) {
+          const data = await res.json()
+          setProfile(data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchProfile()
+  }, [])
+
+  const initials = profile?.name ? profile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'
 
   return (
     <div className="w-64 border-r border-white/5 bg-[#0a0a0b] h-full flex flex-col hidden md:flex">
@@ -24,7 +43,7 @@ export function Sidebar() {
         <span className="ml-3 font-semibold text-foreground tracking-wide relative z-10">COLLATERAL</span>
       </div>
       
-      <div className="flex-1 py-6 px-4 space-y-1">
+      <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
         <div className="text-xs font-medium text-muted-foreground/50 mb-4 px-2 tracking-widest uppercase">Menu</div>
         {navItems.map((item) => {
           const isActive = pathname === item.href
@@ -50,15 +69,15 @@ export function Sidebar() {
       </div>
       
       <div className="p-4 border-t border-white/5 space-y-3">
-        <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary-foreground">
-            TB
+        <Link href="/profile" className="block p-3 bg-white/5 rounded-xl border border-white/10 hover:border-primary/50 transition-colors flex items-center gap-3 cursor-pointer group">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary-foreground group-hover:from-primary/60 transition-all">
+            {profile ? initials : <User className="w-4 h-4" />}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">Tech Bro</p>
-            <p className="text-xs text-muted-foreground truncate">Product Lead</p>
+            <p className="text-sm font-medium text-foreground truncate">{profile?.name || "Loading..."}</p>
+            <p className="text-xs text-muted-foreground truncate">{profile?.jobTitle || "Profile"}</p>
           </div>
-        </div>
+        </Link>
 
         <button 
           onClick={() => signOut({ callbackUrl: "/login" })}

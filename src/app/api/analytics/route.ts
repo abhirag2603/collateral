@@ -13,9 +13,39 @@ export async function GET() {
     await connectDB();
     const snapshots = await ScoreSnapshot.find({ userId: session.user.id }).sort({ createdAt: 1 });
     
-    // If no snapshots exist, we can pre-seed a starting snapshot based on the current date
+    // If no snapshots exist, we can pre-seed 30 days of mock historical data 
+    // to simulate "more and more inputs" over time for the trend chart
     if (snapshots.length === 0) {
-      return NextResponse.json([]);
+      const generatedSnapshots = [];
+      let currentScore = 40;
+      
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(12, 0, 0, 0);
+
+        currentScore = Math.min(100, Math.max(0, currentScore + (Math.random() * 8 - 3))); // slight upward bias
+        
+        generatedSnapshots.push({
+          userId: session.user.id,
+          totalScore: Math.round(currentScore),
+          breakdown: {
+            financial: Math.round(currentScore * 0.9),
+            skill: Math.round(currentScore * 1.1),
+            execution: Math.round(currentScore * 0.8),
+            opportunity: Math.round(currentScore * 1.0),
+            risk: Math.round(currentScore * 0.9)
+          },
+          createdAt: d
+        });
+      }
+      
+      // Save all snapshots
+      for (const snap of generatedSnapshots) {
+        await ScoreSnapshot.create(snap);
+      }
+      
+      return NextResponse.json(generatedSnapshots);
     }
 
     return NextResponse.json(snapshots);
