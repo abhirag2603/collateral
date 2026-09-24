@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { User, Briefcase, FileText, Loader2, Save, CheckCircle } from "lucide-react"
 
 export default function ProfilePage() {
-  const [formData, setFormData] = useState({ name: "", jobTitle: "", bio: "" })
+  const [formData, setFormData] = useState({ name: "", jobTitle: "", industry: "", bio: "" })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -19,6 +19,7 @@ export default function ProfilePage() {
           setFormData({
             name: data.name || "",
             jobTitle: data.jobTitle || "",
+            industry: data.industry || "",
             bio: data.bio || "",
           })
         }
@@ -103,6 +104,19 @@ export default function ProfilePage() {
               onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
               className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-colors"
               placeholder="e.g. Senior Software Engineer"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" /> Industry / Domain
+            </label>
+            <input 
+              type="text" 
+              value={formData.industry}
+              onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-colors"
+              placeholder="e.g. Software & AI"
             />
           </div>
 

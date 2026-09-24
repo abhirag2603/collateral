@@ -31,7 +31,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, jobTitle, bio } = await req.json();
+    const { name, jobTitle, industry, bio } = await req.json();
 
     if (!name) {
       return NextResponse.json({ message: "Name is required" }, { status: 400 });
@@ -40,7 +40,7 @@ export async function PUT(req: Request) {
     await connectDB();
     const updatedUser = await User.findByIdAndUpdate(
       session.user.id,
-      { $set: { name, jobTitle, bio } },
+      { $set: { name, jobTitle, industry, bio } },
       { new: true }
     );
 
